@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.fx.ide.jdt.core.JAVAFX_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/opencsv-3.1.jar"/>
+	<classpathentry kind="lib" path="lib/controlsfx-8.20.8.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/med/lib/controlsfx-8.20.8-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/openjfx-dialogs-1.0.2.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
