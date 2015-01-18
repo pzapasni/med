@@ -2,50 +2,61 @@ package model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
 public class Point {
-	
-	private List<Double> value = new ArrayList<Double>();
-	private PointType pointType = PointType.UNVISITED;
-	private int clusterNumber;
 
-	public Point() {}
-	
-	public Point(List<Double> value) {
-		this.value = value;
-	}
-	
-	public List<Double> getValue() {
-		return value;
-	}
+    private List<Double> value = new ArrayList<Double>();
+    private PointType pointType = PointType.UNVISITED;
+    private int clusterNumber;
 
-	public void setValue(List<Double> value) {
-		this.value = value;
-	}
+    public Point() {
+    }
 
-	public PointType getPointType() {
-		return pointType;
-	}
+    public Point(List<Double> value) {
+        this.value = value;
+    }
 
-	public void setPointType(PointType pointType) {
-		this.pointType = pointType;
-	}
+    public Point(double[] value) {
+        this.value = DoubleStream.of(value).boxed().collect(Collectors.toList());
+    }
 
-	public int getClusterNumber() {
-		return clusterNumber;
-	}
+    public List<Double> getValue() {
+        return value;
+    }
 
-	public void setClusterNumber(int clusterNumber) {
-		this.clusterNumber = clusterNumber;
-	}
-	
-	@Override
-	public String toString() {
-		return "Type: " + pointType.toString() + ", value: " + value.toString() + ", cluster: " + clusterNumber;
-	}
+    public double[] getValueAsPrimitives() {
+        return value.stream().mapToDouble(Double::doubleValue).toArray();
+    }
 
-	public static enum PointType {
-		UNVISITED, VISITED, NOISE
-	}
+    public void setValue(List<Double> value) {
+        this.value = value;
+    }
+
+    public PointType getPointType() {
+        return pointType;
+    }
+
+    public void setPointType(PointType pointType) {
+        this.pointType = pointType;
+    }
+
+    public int getClusterNumber() {
+        return clusterNumber;
+    }
+
+    public void setClusterNumber(int clusterNumber) {
+        this.clusterNumber = clusterNumber;
+    }
+
+    @Override
+    public String toString() {
+        return "Type: " + pointType.toString() + ", value: " + value.toString() + ", cluster: " + clusterNumber;
+    }
+
+    public static enum PointType {
+        UNVISITED, VISITED, NOISE
+    }
 
 }
