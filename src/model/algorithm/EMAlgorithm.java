@@ -41,7 +41,7 @@ public class EMAlgorithm extends Algorithm {
         this.data = pointsToMatrix();
 
         this.probabilities = new DenseDoubleMatrix2D(numClasses, pointsCount);
-        this.means = new DenseDoubleMatrix2D(dimensions, numClasses);
+        this.means = new DenseDoubleMatrix2D(numClasses, dimensions);
         this.deviations = new DenseDoubleMatrix1D(numClasses);
         this.classesProbs = new DenseDoubleMatrix1D(numClasses);
         // initialization
@@ -86,7 +86,7 @@ public class EMAlgorithm extends Algorithm {
             DoubleMatrix2D newProbs = probabilities.like();
             for (int k = 0; k < numClasses; k++) {
                 for (int n = 0; n < pointsCount; n++) {
-                    double p = newClassProbs.get(k) * gaussianDensity(data.viewRow(n).toArray(), newMeans.viewColumn(k).toArray(), newDeviations.get(k));
+                    double p = newClassProbs.get(k) * gaussianDensity(data.viewRow(n).toArray(), newMeans.viewRow(k).toArray(), newDeviations.get(k));
                     newProbs.set(k, n, p);
                 }
             }
