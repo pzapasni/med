@@ -111,9 +111,9 @@ public class EMAlgorithm extends Algorithm {
     private void generateRandomProbabilities() {
         probabilities.assign(x -> Math.random());
         // Normalization
-        for (int k = 0; k < numClasses; k++) {
-            double sum = probabilities.viewRow(k).aggregate(Functions.plus, Functions.identity);
-            probabilities.viewRow(k).assign(x -> x / sum);
+        for (int n = 0; n < pointsCount; n++) {
+            double sum = probabilities.viewColumn(n).aggregate(Functions.plus, Functions.identity);
+            probabilities.viewColumn(n).assign(x -> x / sum);
         }
     }
 
