@@ -34,7 +34,7 @@ public class EMAlgorithm extends Algorithm {
     }
 
     @Override
-    protected Void call() throws Exception {
+    protected void calculate() {
         // Input: point: array of points
         this.dimensions = points.get(0).getValue().size();
         this.pointsCount = points.size();
@@ -105,7 +105,6 @@ public class EMAlgorithm extends Algorithm {
 
         // Assign classes
         assignClassesToPoints();
-        return null;
     }
 
     private void generateRandomProbabilities() {

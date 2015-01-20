@@ -171,11 +171,12 @@ public class MainController {
 
 	}
 
-	public void onCalculationSuccess() {
+	public void onCalculationSuccess(long executionTime) {
 		Alert alert = new Alert(AlertType.INFORMATION);
 		alert.setTitle("Success");
 		alert.setHeaderText("Computation finished");
-		alert.setContentText("Results were calculated and saved to file");
+		alert.setContentText(String.format("Results were calculated and saved to file.\nExecution time: %sms",
+				executionTime));
 
 		alert.showAndWait();
 	}

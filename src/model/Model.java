@@ -66,7 +66,7 @@ public class Model {
 				controller.onCalculationFail(e2.toString());
 				return;
 			}
-			controller.onCalculationSuccess();
+			controller.onCalculationSuccess(algorithm.getExecutionTime());
 		});
 
 		new Thread(algorithm).start(); // FIXME

@@ -24,7 +24,7 @@ public class DBSCANAlgorithm extends Algorithm {
 	}
 
 	@Override
-	protected Void call() throws Exception {
+	protected void calculate() {
 		calculateDistanceMap();
 		
 		int clusterNo = 0;
@@ -46,7 +46,6 @@ public class DBSCANAlgorithm extends Algorithm {
 			
 			System.out.println("iteracja " + i);
 		}
-		return null;
 	}
 
 	private void expandCluster(Point point, List<Point> neighborPoints,
