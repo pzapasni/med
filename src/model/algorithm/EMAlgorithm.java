@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 public class EMAlgorithm extends Algorithm {
     private static final double SQRT_FROM_2_PI = Math.sqrt(2 * Math.PI);
     private final int numClasses;
+    private final int iterations;
     private int dimensions;
     private int pointsCount;
     private DoubleMatrix2D data;
@@ -28,9 +29,10 @@ public class EMAlgorithm extends Algorithm {
     private DoubleMatrix1D deviations;
     private DoubleMatrix1D classesProbs;
 
-    public EMAlgorithm(Metric metric, final int numClasses) {
+    public EMAlgorithm(Metric metric, final int numClasses, final int iterations) {
         super(metric);
         this.numClasses = numClasses;
+        this.iterations = iterations;
     }
 
     @Override
@@ -47,8 +49,7 @@ public class EMAlgorithm extends Algorithm {
         // initialization
         generateRandomProbabilities();
 
-        // FIXME :: use another stop condition or parametrize it
-        int counter = 100;
+        int counter = iterations;
         while (counter-- > 0) {
             // First "E" step is random generation, we begin with "M"
             // M step
