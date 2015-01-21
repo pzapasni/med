@@ -1,9 +1,10 @@
 package model.algorithm;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import model.Point;
 import model.Point.PointType;
@@ -14,7 +15,7 @@ public class DBSCANAlgorithm extends Algorithm {
 	private final double epsilon;
 	private final int minPoints;
 	
-	private Map<Point, Map<Point, Double>> distanceMap = new HashMap<>();
+	private Map<Point, List<Point>> adjacencyMap = new HashMap<>();
 
 	public DBSCANAlgorithm(Metric metric, double epsilon, int minPoints) {
 		super(metric);
@@ -25,7 +26,7 @@ public class DBSCANAlgorithm extends Algorithm {
 
 	@Override
 	protected void calculate() {
-		calculateDistanceMap();
+		calculateAdjacencyMap();
 		
 		int clusterNo = 0;
 		for (int i = 0; i < points.size() && !isCancelled(); ++i) {
@@ -35,7 +36,7 @@ public class DBSCANAlgorithm extends Algorithm {
 				continue;
 
 			point.setPointType(PointType.VISITED);
-			List<Point> neighborPoints = regionQuery(point);
+			List<Point> neighborPoints = new ArrayList<>(regionQuery(point));
 			if (neighborPoints.size() < minPoints) {
 				point.setPointType(PointType.NOISE);
 			} else {
@@ -43,9 +44,9 @@ public class DBSCANAlgorithm extends Algorithm {
 			}
 			
 			updateProgress(i, points.size());
-			
-			System.out.println("iteracja " + i);
 		}
+		
+		updateProgress(1, 1);
 	}
 
 	private void expandCluster(Point point, List<Point> neighborPoints,
@@ -58,49 +59,45 @@ public class DBSCANAlgorithm extends Algorithm {
 				neighbor.setPointType(PointType.VISITED);
 				List<Point> neighborPoints2 = regionQuery(point);
 				if (neighborPoints2.size() >= minPoints) {
-					neighborPoints2.removeAll(neighborPoints);
-					neighborPoints.addAll(neighborPoints2);
+					List<Point> copy = new ArrayList<>(neighborPoints2);
+					copy.removeAll(neighborPoints);
+					neighborPoints.addAll(copy);
 				}
 			}
 			
 			if (neighbor.getClusterNumber() == 0) {
 				neighbor.setClusterNumber(clusterNo);
 			}
-			
-			System.out.println("wewn iteracja " + i);
 		}
 	}
 
-	private List<Point> regionQuery(Point query) {
-		return points
-				.parallelStream()
-				.filter(point -> getDistance(point, query) < epsilon)
-				.collect(Collectors.toList());
+	private List<Point> regionQuery(Point query) {		
+		return adjacencyMap.get(query);
 	}
 	
-	private void calculateDistanceMap() {
-		distanceMap.clear();
+	private void calculateAdjacencyMap() {
+		adjacencyMap.clear();
 		
-		for (int i = 0; i < points.size(); ++i) {
-			Map<Point, Double> map = new HashMap<>();
-			Point point1 = points.get(i);
-			map.put(point1, 0.0);
+		points.forEach(point1 -> {
+			final List<Point> list = new ArrayList<>();
 			
-			for (int j = i + 1; j < points.size(); ++j) {
-				Point point2 = points.get(j);
-				map.put(point2, metric.computeDistance(point1, point2));
-			}
+			points.forEach(point2 -> {
+				if (point1 == point2)
+					return;
+				
+				if (adjacencyMap.get(point2) != null) {
+					if (adjacencyMap.get(point2).contains(point1)) {
+						list.add(point2);
+					}
+				} else {
+					if (metric.computeDistance(point1, point2) < epsilon) {
+						list.add(point2);
+					}
+				}
+			});
 			
-			distanceMap.put(point1, map);
-		}
-	}
-	
-	private double getDistance(Point p1, Point p2) {
-		Double result = distanceMap.get(p1).get(p2);
-		if (result == null)
-			result = distanceMap.get(p2).get(p1);
-		
-		return result;
+			adjacencyMap.put(point1, Collections.unmodifiableList(list));
+		});
 	}
 
 }

@@ -8,10 +8,6 @@ import cern.jet.math.Functions;
 import model.Point;
 import model.metric.Metric;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
 /**
  * Implementation of the Expectation-maximalization algorithm
  *
@@ -50,7 +46,7 @@ public class EMAlgorithm extends Algorithm {
         generateRandomProbabilities();
 
         int counter = iterations;
-        while (counter-- > 0) {
+        while (counter-- > 0 && !isCancelled()) {
             // First "E" step is random generation, we begin with "M"
             // M step
             DoubleMatrix2D newMeans = means.like();
@@ -102,6 +98,8 @@ public class EMAlgorithm extends Algorithm {
             means = newMeans;
             deviations = newDeviations;
             classesProbs = newClassProbs;
+            
+            updateProgress(iterations - counter, iterations);
         }
 
         // Assign classes

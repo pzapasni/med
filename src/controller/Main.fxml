@@ -68,8 +68,8 @@
                 <children>
                     <Label text="Number of classes" />
                     <TextField fx:id="emNumberOfClasses" GridPane.columnIndex="1" />
-                    <Label text="Number of iterations"  GridPane.rowIndex="1" />
-                    <TextField fx:id="emIterations" GridPane.columnIndex="1"  GridPane.rowIndex="1" />
+                    <Label text="Number of iterations" GridPane.rowIndex="1" />
+                    <TextField fx:id="emIterations" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                 </children>
             </GridPane>
          </children>

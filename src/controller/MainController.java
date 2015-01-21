@@ -71,18 +71,15 @@ public class MainController {
 
 	private FileChooser fileChooser;
 	private Model model = Model.getInstance();
-	private ValidationSupport validationSupport;
+	private ValidationSupport validationSupport = new ValidationSupport();
 
 	public MainController() {
 		model.setController(this);
 
 		fileChooser = new FileChooser();
-		fileChooser.getExtensionFilters().add(
-				new ExtensionFilter("CSV file", "*.csv", "*.txt"));
-		fileChooser.getExtensionFilters().add(
+		fileChooser.getExtensionFilters().addAll(
+				new ExtensionFilter("CSV file", "*.csv", "*.txt"),
 				new ExtensionFilter("All files", "*.*"));
-
-		validationSupport = new ValidationSupport();
 	}
 
 	@FXML
@@ -95,30 +92,33 @@ public class MainController {
 		validationSupport.registerValidator(separatorTextfield, (Control c,
 				String value) -> ValidationResult.fromErrorIf(c,
 				"Please enter one character", value.length() != 1));
-
+			
 		validationSupport.registerValidator(dbscanEpsilon, (Control textField,
 				String value) -> ValidationResult.fromErrorIf(textField,
 				"Invalid value - must be a Double", dbscanRadio.isSelected()
 						&& !isDouble(value)));
-
+		
 		validationSupport.registerValidator(dbscanMinPoints, (
 				Control textField, String value) -> ValidationResult
 				.fromErrorIf(textField, "Invalid value - must be an Integer",
 						dbscanRadio.isSelected() && !isInteger(value)));
 
-		validationSupport.registerValidator(emNumberOfClasses, (Control textField,
-															String value) -> ValidationResult.fromErrorIf(textField,
-				"Invalid value - must be an Integer", emRadio.isSelected()
-						&& !isInteger(value)));
-		validationSupport.registerValidator(emIterations, (
+		validationSupport.registerValidator(emNumberOfClasses, (
 				Control textField, String value) -> ValidationResult
 				.fromErrorIf(textField, "Invalid value - must be an Integer",
 						emRadio.isSelected() && !isInteger(value)));
 
+		validationSupport.registerValidator(emIterations, (Control textField,
+				String value) -> ValidationResult.fromErrorIf(textField,
+				"Invalid value - must be an Integer", emRadio.isSelected()
+						&& !isInteger(value)));
+
 		confirm.disableProperty().bind(
-				validationSupport.invalidProperty().or(
-						model.inputFileProperty().isNull()
-								.or(model.outputFileProperty().isNull())));
+				validationSupport
+						.invalidProperty()
+						.or(model.inputFileProperty().isNull()
+								.or(model.outputFileProperty().isNull()))
+						.or(cancel.disabledProperty().not()));
 
 		metricsComboBox.getItems().addAll(new ManhattanMetric(),
 				new EuclideanMetric());
@@ -167,28 +167,35 @@ public class MainController {
 		cancel.disableProperty().bind(algorithm.runningProperty().not());
 
 		final Algorithm dummy = algorithm;
-		cancel.setOnAction(e -> dummy.cancel());
+		cancel.setOnAction(e -> {
+			dummy.cancel();
+
+			progressBar.progressProperty().unbind();
+			progressBar.setProgress(0.0);
+		});
 
 		model.setAlgorithm(algorithm);
 		model.computeResults();
 	}
 
-	@FXML
-	private void onCancelButtonSelected() {
-
-	}
-
 	public void onCalculationSuccess(long executionTime) {
+		progressBar.progressProperty().unbind();
+		progressBar.setProgress(0.0);
+
 		Alert alert = new Alert(AlertType.INFORMATION);
 		alert.setTitle("Success");
 		alert.setHeaderText("Computation finished");
-		alert.setContentText(String.format("Results were calculated and saved to file.\nExecution time: %sms",
-				executionTime));
+		alert.setContentText(String
+				.format("Results were calculated and saved to file.\nExecution time: %sms",
+						executionTime));
 
 		alert.showAndWait();
 	}
 
 	public void onCalculationFail(String message) {
+		progressBar.progressProperty().unbind();
+		progressBar.setProgress(0.0);
+
 		Alert alert = new Alert(AlertType.ERROR);
 		alert.setTitle("Error");
 		alert.setHeaderText("Computation failed");
