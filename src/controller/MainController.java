@@ -1,9 +1,14 @@
 package controller;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.controlsfx.validation.ValidationResult;
 import org.controlsfx.validation.ValidationSupport;
+
 import model.Model;
 import model.algorithm.Algorithm;
 import model.algorithm.DBSCANAlgorithm;
@@ -14,6 +19,11 @@ import model.metric.Metric;
 import application.MEDApplication;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.ScatterChart;
+import javafx.scene.chart.XYChart.Data;
+import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -24,6 +34,7 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javafx.stage.FileChooser.ExtensionFilter;
 
 public class MainController {
@@ -190,6 +201,34 @@ public class MainController {
 						executionTime));
 
 		alert.showAndWait();
+		
+		displayChart();
+	}
+	
+	private void displayChart() {
+		ScatterChart<Number, Number> chart = new ScatterChart<>(new NumberAxis(), new NumberAxis());
+		Map<Integer, Series<Number, Number>> map = new HashMap<>();
+		
+		model.getPoints().forEach(point -> {
+			List<Double> list = point.getValue();
+			if (map.get(point.getClusterNumber()) != null) {
+				map.get(point.getClusterNumber()).getData().add(new Data<Number, Number>(list.get(0), list.get(1)));
+			} else {
+				Series<Number, Number> series = new Series<>();
+				series.getData().add(new Data<Number, Number>(list.get(0), list.get(1)));
+				map.put(point.getClusterNumber(), series);
+			}
+		});
+		
+		if (map.get(0) != null) {
+			map.get(0).setName("Noise");
+		}
+		
+		chart.getData().addAll(map.values());
+		
+		Stage stage = new Stage();
+		stage.setScene(new Scene(chart, 500, 500));
+		stage.show();
 	}
 
 	public void onCalculationFail(String message) {

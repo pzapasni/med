@@ -194,4 +194,8 @@ public class Model {
 		this.separatorProperty().set(separator);
 	}
 
+	public List<Point> getPoints() {
+		return points;
+	}
+
 }
