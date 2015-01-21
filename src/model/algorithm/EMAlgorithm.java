@@ -127,6 +127,8 @@ public class EMAlgorithm extends Algorithm {
                     classId = i;
                 }
             }
+            // We're starting with 0 as noise
+            classId++;
             points.get(n).setClusterNumber(classId);
         }
     }
