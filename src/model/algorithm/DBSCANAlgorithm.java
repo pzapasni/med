@@ -28,7 +28,7 @@ public class DBSCANAlgorithm extends Algorithm {
 	protected void calculate() {
 		calculateAdjacencyMap();
 		
-		int clusterNo = 0;
+		int clusterNo = 1;
 		for (int i = 0; i < points.size() && !isCancelled(); ++i) {
 			Point point = points.get(i);
 			
@@ -40,7 +40,7 @@ public class DBSCANAlgorithm extends Algorithm {
 			if (neighborPoints.size() < minPoints) {
 				point.setPointType(PointType.NOISE);
 			} else {
-				expandCluster(point, neighborPoints, ++clusterNo);
+				expandCluster(point, neighborPoints, clusterNo++);
 			}
 			
 			updateProgress(i, points.size());
@@ -57,7 +57,7 @@ public class DBSCANAlgorithm extends Algorithm {
 			Point neighbor = neighborPoints.get(i);
 			if (neighbor.getPointType() == PointType.UNVISITED) {
 				neighbor.setPointType(PointType.VISITED);
-				List<Point> neighborPoints2 = regionQuery(point);
+				List<Point> neighborPoints2 = regionQuery(neighbor);//regionQuery(point);
 				if (neighborPoints2.size() >= minPoints) {
 					List<Point> copy = new ArrayList<>(neighborPoints2);
 					copy.removeAll(neighborPoints);
@@ -78,8 +78,9 @@ public class DBSCANAlgorithm extends Algorithm {
 	private void calculateAdjacencyMap() {
 		adjacencyMap.clear();
 		
-		points.forEach(point1 -> {
+		for (int i = 0; i < points.size() && !isCancelled(); ++i) {
 			final List<Point> list = new ArrayList<>();
+			Point point1 = points.get(i);
 			
 			points.forEach(point2 -> {
 				if (point1 == point2)
@@ -97,7 +98,8 @@ public class DBSCANAlgorithm extends Algorithm {
 			});
 			
 			adjacencyMap.put(point1, Collections.unmodifiableList(list));
-		});
+			updateProgress(i, points.size());
+		}
 	}
 
 }

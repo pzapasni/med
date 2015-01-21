@@ -1,7 +1,6 @@
 package controller;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,12 +9,15 @@ import org.controlsfx.validation.ValidationResult;
 import org.controlsfx.validation.ValidationSupport;
 
 import model.Model;
+import model.Point.PointType;
 import model.algorithm.Algorithm;
 import model.algorithm.DBSCANAlgorithm;
 import model.algorithm.EMAlgorithm;
+import model.metric.ChebyshevMetric;
 import model.metric.EuclideanMetric;
 import model.metric.ManhattanMetric;
 import model.metric.Metric;
+import model.metric.ParisMetric;
 import application.MEDApplication;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
@@ -34,6 +36,7 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser.ExtensionFilter;
 
@@ -72,6 +75,9 @@ public class MainController {
 
 	@FXML
 	private ComboBox<Metric> metricsComboBox;
+	
+	@FXML
+	private CheckBox drawChart;
 
 	@FXML
 	private ProgressBar progressBar;
@@ -103,12 +109,12 @@ public class MainController {
 		validationSupport.registerValidator(separatorTextfield, (Control c,
 				String value) -> ValidationResult.fromErrorIf(c,
 				"Please enter one character", value.length() != 1));
-			
+
 		validationSupport.registerValidator(dbscanEpsilon, (Control textField,
 				String value) -> ValidationResult.fromErrorIf(textField,
 				"Invalid value - must be a Double", dbscanRadio.isSelected()
 						&& !isDouble(value)));
-		
+
 		validationSupport.registerValidator(dbscanMinPoints, (
 				Control textField, String value) -> ValidationResult
 				.fromErrorIf(textField, "Invalid value - must be an Integer",
@@ -131,8 +137,9 @@ public class MainController {
 								.or(model.outputFileProperty().isNull()))
 						.or(cancel.disabledProperty().not()));
 
-		metricsComboBox.getItems().addAll(new ManhattanMetric(),
-				new EuclideanMetric());
+		metricsComboBox.getItems()
+				.addAll(new ManhattanMetric(), new EuclideanMetric(),
+						new ChebyshevMetric(), new ParisMetric());
 		metricsComboBox.getSelectionModel().selectFirst();
 		metricsComboBox.setConverter(Metric.getStringConverter());
 
@@ -149,6 +156,7 @@ public class MainController {
 		if (file != null) {
 			model.setInputFile(file);
 			inputFileText.setText(file.getAbsolutePath());
+			fileChooser.setInitialDirectory(file.getParentFile());
 		}
 	}
 
@@ -159,6 +167,7 @@ public class MainController {
 		if (file != null) {
 			model.setOutputFile(file);
 			outputFileText.setText(file.getAbsolutePath());
+			fileChooser.setInitialDirectory(file.getParentFile());
 		}
 	}
 
@@ -201,33 +210,48 @@ public class MainController {
 						executionTime));
 
 		alert.showAndWait();
-		
-		displayChart();
+
+		if (drawChart.isSelected())
+			displayChart();
 	}
-	
+
 	private void displayChart() {
-		ScatterChart<Number, Number> chart = new ScatterChart<>(new NumberAxis(), new NumberAxis());
+		ScatterChart<Number, Number> chart = new ScatterChart<>(
+				new NumberAxis(), new NumberAxis());
 		Map<Integer, Series<Number, Number>> map = new HashMap<>();
-		
-		model.getPoints().forEach(point -> {
-			List<Double> list = point.getValue();
-			if (map.get(point.getClusterNumber()) != null) {
-				map.get(point.getClusterNumber()).getData().add(new Data<Number, Number>(list.get(0), list.get(1)));
-			} else {
-				Series<Number, Number> series = new Series<>();
-				series.getData().add(new Data<Number, Number>(list.get(0), list.get(1)));
-				map.put(point.getClusterNumber(), series);
-			}
-		});
-		
+
+		model.getPoints().forEach(
+				point -> {
+					List<Double> list = point.getValue();
+					int cluster = point.getPointType() == PointType.NOISE ? 0
+							: point.getClusterNumber();
+
+					if (map.get(cluster) != null) {
+						map.get(cluster)
+								.getData()
+								.add(new Data<Number, Number>(list.get(0), list
+										.get(1)));
+					} else {
+						Series<Number, Number> series = new Series<>();
+						series.getData().add(
+								new Data<Number, Number>(list.get(0), list
+										.get(1)));
+						series.setName("Series " + cluster);
+						map.put(cluster, series);
+					}
+				});
+
 		if (map.get(0) != null) {
 			map.get(0).setName("Noise");
 		}
-		
+
 		chart.getData().addAll(map.values());
-		
+
 		Stage stage = new Stage();
 		stage.setScene(new Scene(chart, 500, 500));
+		stage.setTitle("Results");
+		stage.initModality(Modality.APPLICATION_MODAL);
+		stage.initOwner(MEDApplication.getPrimaryStage());
 		stage.show();
 	}
 

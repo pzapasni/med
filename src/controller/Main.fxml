@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.GridPane?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" spacing="5.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MainController">
+<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" spacing="5.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MainController">
    <children>
       <Label text="Input file:" />
       <HBox spacing="5.0">
@@ -31,10 +31,10 @@
          <children>
             <RadioButton fx:id="dbscanRadio" mnemonicParsing="false" selected="true" text="DBSCAN">
                <toggleGroup>
-                  <ToggleGroup fx:id="algorthms" />
+                  <ToggleGroup fx:id="algorithms" />
                </toggleGroup>
             </RadioButton>
-            <RadioButton fx:id="emRadio" mnemonicParsing="false" text="EM" toggleGroup="$algorthms" />
+            <RadioButton fx:id="emRadio" mnemonicParsing="false" text="EM" toggleGroup="$algorithms" />
          </children>
       </FlowPane>
       <Label text="Algorithm properties:" />
@@ -78,6 +78,11 @@
       <HBox spacing="5.0">
          <children>
             <ComboBox fx:id="metricsComboBox" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
+         </children>
+      </HBox>
+      <HBox spacing="5.0">
+         <children>
+            <CheckBox fx:id="drawChart" mnemonicParsing="false" selected="true" text="Draw a 2D chart with results" />
          </children>
       </HBox>
       <HBox alignment="CENTER_LEFT" spacing="5.0">

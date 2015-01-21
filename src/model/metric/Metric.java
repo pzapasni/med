@@ -9,6 +9,8 @@ public abstract class Metric {
 		
 		private static final String MANHATTAN_NAME = "Manhattan";
 		private static final String EUCLIDEAN_NAME = "Euclidean";
+		private static final String CHEBYSHEV_NAME = "Chebyshev";
+		private static final String PARIS_NAME = "Paris";
 		
 		@Override
 		public String toString(Metric object) {
@@ -23,6 +25,16 @@ public abstract class Metric {
 				public String visit(ManhattanMetric metric) {
 					return MANHATTAN_NAME;
 				}
+
+				@Override
+				public String visit(ChebyshevMetric metric) {
+					return CHEBYSHEV_NAME;
+				}
+
+				@Override
+				public String visit(ParisMetric metric) {
+					return PARIS_NAME;
+				}
 			};
 			
 			return object.accept(visitor);
@@ -36,6 +48,12 @@ public abstract class Metric {
 			
 			case MANHATTAN_NAME:
 				return new ManhattanMetric();
+				
+			case CHEBYSHEV_NAME:
+				return new ChebyshevMetric();
+				
+			case PARIS_NAME:
+				return new ParisMetric();
 				
 			default:
 				throw new RuntimeException("Unknown metric name: " + string);
