@@ -11,6 +11,9 @@
 	<lib name="openjfx-dialogs-1.0.2.jar" scope="COMPILE">
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/openjfx-dialogs-1.0.2.jar!/"/>
 	</lib>
+	<lib name="colt.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/colt.jar!/"/>
+	</lib>
 	<levels>
 		<level name="controlsfx-8.20.8" value="project"/>
 		<level name="opencsv-3.1" value="project"/>
