@@ -71,7 +71,7 @@ public class MainController {
 	@FXML
 	private TextField emNumberOfClasses;
 	@FXML
-	private TextField emIterations;
+	private TextField emDelta;
 
 	@FXML
 	private ComboBox<Metric> metricsComboBox;
@@ -125,10 +125,10 @@ public class MainController {
 				.fromErrorIf(textField, "Invalid value - must be an Integer",
 						emRadio.isSelected() && !isInteger(value)));
 
-		validationSupport.registerValidator(emIterations, (Control textField,
+		validationSupport.registerValidator(emDelta, (Control textField,
 				String value) -> ValidationResult.fromErrorIf(textField,
-				"Invalid value - must be an Integer", emRadio.isSelected()
-						&& !isInteger(value)));
+				"Invalid value - must be a Double", emRadio.isSelected()
+						&& !isDouble(value)));
 
 		confirm.disableProperty().bind(
 				validationSupport
@@ -181,7 +181,7 @@ public class MainController {
 		else if (emRadio.isSelected())
 			algorithm = new EMAlgorithm(metricsComboBox.getValue(),
 					Integer.parseInt(emNumberOfClasses.getText()),
-					Integer.parseInt(emIterations.getText()));
+					Double.parseDouble(emDelta.getText()));
 
 		progressBar.progressProperty().bind(algorithm.progressProperty());
 		cancel.disableProperty().bind(algorithm.runningProperty().not());

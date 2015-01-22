@@ -16,19 +16,19 @@ import model.metric.Metric;
 public class EMAlgorithm extends Algorithm {
     private static final double SQRT_FROM_2_PI = Math.sqrt(2 * Math.PI);
     private final int numClasses;
-    private final int iterations;
     private int dimensions;
     private int pointsCount;
+    private final double delta;
     private DoubleMatrix2D data;
     private DoubleMatrix2D probabilities;
     private DoubleMatrix2D means;
     private DoubleMatrix1D deviations;
     private DoubleMatrix1D classesProbs;
 
-    public EMAlgorithm(Metric metric, final int numClasses, final int iterations) {
+    public EMAlgorithm(Metric metric, final int numClasses, final double delta) {
         super(metric);
         this.numClasses = numClasses;
-        this.iterations = iterations;
+        this.delta = delta;
     }
 
     @Override
@@ -45,8 +45,10 @@ public class EMAlgorithm extends Algorithm {
         // initialization
         generateRandomProbabilities();
 
-        int counter = iterations;
-        while (counter-- > 0 && !isCancelled()) {
+        int counter = 0;
+        double currentDelta;
+        double likelihood = Double.POSITIVE_INFINITY;
+        do {
             // First "E" step is random generation, we begin with "M"
             // M step
             DoubleMatrix2D newMeans = means.like();
@@ -93,17 +95,22 @@ public class EMAlgorithm extends Algorithm {
                 newProbs.viewColumn(n).assign(x -> x / sum);
             }
 
+            double newLikelihood = likelihood(data, newMeans, newDeviations, newClassProbs);
+            currentDelta = Math.abs(newLikelihood - likelihood);
+
             // Next iteration
             probabilities = newProbs;
             means = newMeans;
             deviations = newDeviations;
             classesProbs = newClassProbs;
-            
-            updateProgress(iterations - counter, iterations);
-        }
+            likelihood = newLikelihood;
 
+            counter++;
+
+        } while (currentDelta > delta);
         // Assign classes
         assignClassesToPoints();
+        System.out.println("Number of iterations: " + counter);
     }
 
     private void generateRandomProbabilities() {
@@ -155,6 +162,20 @@ public class EMAlgorithm extends Algorithm {
             matrix.viewRow(i).assign(points.get(i).getValueAsPrimitives());
         }
         return matrix;
+    }
+
+    private double likelihood(DoubleMatrix2D data, DoubleMatrix2D means, DoubleMatrix1D deviations, DoubleMatrix1D classesProbs) {
+        // calculate the likelihood
+        double likelihood = 0.0;
+        for (int n = 0; n < pointsCount; n++) {
+            double rowSum = 0.0;
+            for (int k = 0; k < numClasses; k++) {
+                double p = classesProbs.get(k) * gaussianDensity(data.viewRow(n).toArray(), means.viewRow(k).toArray(), deviations.get(k));
+                rowSum += p;
+            }
+            likelihood += Math.log(rowSum);
+        }
+        return likelihood;
     }
 
 }
